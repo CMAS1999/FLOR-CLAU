@@ -59,21 +59,53 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('fullscreenchange', updateFullscreenButton);
   document.addEventListener('webkitfullscreenchange', updateFullscreenButton);
 
-  btn.addEventListener('click', function() {
+ btn.addEventListener('click', function () {
     btn.disabled = true;
-    if (music) {
-      music.volume = 0.7;
-      const playPromise = music.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(()=>{});
-      }
-    }
-    galaxyController.startCinematic();
-    modal.classList.add('is-leaving');
-    document.body.classList.add('galaxy-started');
-    galaxyUI.setAttribute('aria-hidden', 'false');
-  });
 
+    // Iniciar la música
+    if (music) {
+        music.volume = 0.7;
+        music.muted = false;
+
+        const playPromise = music.play();
+
+        if (playPromise !== undefined) {
+            playPromise.catch(function (error) {
+                console.warn('No se pudo iniciar la música:', error);
+            });
+        }
+    }
+
+    // Iniciar la galaxia
+    if (
+        galaxyController &&
+        typeof galaxyController.startCinematic === 'function'
+    ) {
+        galaxyController.startCinematic();
+    }
+
+    // Ocultar el modal inicial
+    if (modal) {
+        modal.classList.add('is-leaving');
+    }
+
+    // Mostrar la galaxia
+    document.body.classList.add('galaxy-started');
+
+    if (galaxyUI) {
+        galaxyUI.setAttribute('aria-hidden', 'false');
+    }
+
+    // Después de 5 segundos mostrar el jardín
+    setTimeout(function () {
+        document.body.classList.remove('galaxy-started');
+        document.body.classList.add('garden-visible');
+
+        if (galaxyUI) {
+            galaxyUI.setAttribute('aria-hidden', 'true');
+        }
+    }, 5000);
+});
   requestAnimationFrame(function() {
     runGalaxy({
       onReady: function(controller) {
